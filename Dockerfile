@@ -23,12 +23,12 @@ FROM python:3.13.3-alpine
 ENV PYTHONPATH=/project/pkgs
 WORKDIR /project
 # retrieve packages from build stage
-COPY --from=builder /project/__pypackages__/3.12/lib /project/pkgs
+COPY --from=builder /project/__pypackages__/3.13/lib /project/pkgs
 # retrieve executables
-COPY --from=builder /project/__pypackages__/3.12/bin/* /bin/
+COPY --from=builder /project/__pypackages__/3.13/bin/* /bin/
 
-# copy project files
-COPY proxy.py log src views static /project/
+# copy project files, 如何指定详细文件和目录会造成将目录内文件copy到镜像中，而没有将相关目录拷贝到镜像中，例如: COPY log src static views /project/
+COPY . /project/
 
 # expose port
 EXPOSE 8000
