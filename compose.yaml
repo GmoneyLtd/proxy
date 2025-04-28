@@ -1,0 +1,33 @@
+services:
+  proxy-poc:
+    image: registry.cn-hangzhou.aliyuncs.com/apuer/proxy:${TAG:-0.1.0}
+    container_name: proxy
+    hostname: proxy
+    restart: unless-stopped
+    networks:
+      dvlan:
+        ipv4_address: 172.30.60.60
+    dns:
+      - 240e:47:0:701::1
+      - 61.128.192.68
+      - 223.5.5.5
+    # slim 镜像没有ping 命令，需要安装, python:slim 原始镜像没有安装ping 命令
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost:8000/api/health-check || exit 1
+      interval: 300s
+      timeout: 5s
+      retries: 2
+    environment:
+      - TZ=CST-8
+    volumes:
+      # 配置数据目录
+      - ./log:/project/log
+      # # 挂载时区
+      # - /etc/localtime:/etc/localtime:ro
+      
+networks:
+  dvlan:
+    name: dnet60
+    external: true

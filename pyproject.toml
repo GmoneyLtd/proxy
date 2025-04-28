@@ -1,0 +1,15 @@
+[project]
+name = "proxy-poc"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "apuer", email = "apuer@gmoney.ltd"},
+]
+dependencies = ["bottle>=0.13.3", "gevent>=25.4.2"]
+requires-python = "==3.13.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
