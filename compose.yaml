@@ -12,20 +12,20 @@ services:
       - 61.128.192.68
       - 223.5.5.5
     # slim 镜像没有ping 命令，需要安装, python:slim 原始镜像没有安装ping 命令
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - curl -f http://localhost:8000/api/health-check || exit 1
-      interval: 300s
-      timeout: 5s
-      retries: 2
-    environment:
-      - TZ=CST-8
+    healthcheck:  
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/api/health-check"]   
+      interval: 180s 
+      timeout: 5s 
+      retries: 2 
+      start_period: 40s 
+    # environment:
+    #   - TZ=CST-8
     volumes:
       # 配置数据目录
       - ./log:/project/log
-      # # 挂载时区
-      # - /etc/localtime:/etc/localtime:ro
+      # # 挂载时区, 与environments TZ效果还是有些不一样, 例如系统日志会使用UTC时区
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
       
 networks:
   dvlan:
