@@ -25,6 +25,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 # 暴露应用端口
 EXPOSE 8000
 # 应用程序健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD [ "curl", "-f", "http://localhost/api/healthz" ]
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD [ "curl", "-f", "http://localhost:8000/api/healthz" ]
 # 运行应用
 CMD ["python", "proxy.py"]
