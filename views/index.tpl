@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="/static/proxy.svg">
     <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet"> -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <style>
         body {
             margin: 0;
@@ -18,6 +21,30 @@
             color: #333;
             height: 100vh;
             overflow: hidden;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .button-container button {
+            padding: 8px 15px;
+            background-color: #c2c9d0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .button-container button:hover {
+            background-color: #d34959;
+        }
+
+        #response_headers_table {
+            display: none;
+            /* Initially hidden */
         }
 
         h3 {
@@ -37,6 +64,17 @@
             font-style: italic;
             font-family: 'Comic Sans MS', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
             text-align: center;
+        }
+
+        p {
+            /* padding: 10px 0px 10px 40px; */
+            margin: 10px 0;
+            font-size: 12px;
+            font-family: 'Comic Sans MS', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-weight: 800;
+            position: relative;
+            /* left: 20px; */
+            margin-left: 20px;
         }
 
         #container {
@@ -62,7 +100,7 @@
             margin: 10px auto;
         }
 
-        #info_table {
+        .info_table {
             border-collapse: collapse;
             margin: 0 auto;
             line-height: 20px;
@@ -70,11 +108,11 @@
             table-layout: fixed;
         }
 
-        #info_table tr {
+        .info_table tr {
             height: 30px;
         }
 
-        #info_table td {
+        .info_table td {
             border: solid 1px #888;
             padding: 0px 10px;
             word-wrap: break-word;
@@ -106,7 +144,11 @@
         <div id="info_area">
             <h3>display source IP and HTTP headers</h3>
             <h4>Source IP => {{source_info}}</h4>
-            <table id="info_table" summary="display Info Table">
+            <div class="button-container">
+                <button id="toggle_response_headers_btn">显示/隐藏服务器响应头</button>
+            </div>
+            <p>The following is the client request header information</p>
+            <table class="info_table" summary="Client request Headers">
                 % for key, value in headers.items():
                 <tr>
                     <td class="info_table_label">{{key}}</td>
@@ -114,9 +156,87 @@
                 </tr>
                 % end
             </table>
+            <p id="response_headers_info">The following is the server response header information</p>
+            <table class="info_table" id="response_headers_table" summary="Server Response Headers">
+                <!-- Response headers will be populated here by JavaScript -->
+            </table>
+            <div style="height: 50px;"></div>
         </div>
     </div>
-    <div id="footer">&copy; 2024 Powered By Proxy PoC</div>
+    <div id="footer">&copy; 2025 Powered By Proxy PoC</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButton = document.getElementById('toggle_response_headers_btn');
+            const responseHeadersTable = document.getElementById('response_headers_table');
+            const responseHeadersInfo = document.getElementById('response_headers_info');
+            const responseHeadersTbody = responseHeadersTable.createTBody(); // Create tbody element
+
+            function fetchAndDisplayResponseHeaders() {
+                fetch(window.location.href, {
+                    method: 'GET',
+                    redirect: 'manual',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(response => {
+                        const headers = {};
+                        response.headers.forEach((value, key) => {
+                            headers[key] = value;
+                        });
+
+                        responseHeadersTbody.innerHTML = '';
+                        let hasHeaders = false;
+                        for (const key in headers) {
+                            if (headers.hasOwnProperty(key)) {
+                                const row = responseHeadersTbody.insertRow();
+                                const keyCell = row.insertCell();
+                                const valueCell = row.insertCell();
+                                keyCell.className = 'info_table_label';
+                                keyCell.textContent = key;
+                                valueCell.textContent = headers[key];
+                                hasHeaders = true;
+                            }
+                        }
+
+                        if (!hasHeaders) {
+                            const row = responseHeadersTbody.insertRow();
+                            const cell = row.insertCell();
+                            cell.colSpan = 2;
+                            cell.textContent = '没有获取到响应头信息。';
+                            cell.style.textAlign = 'center';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching headers:', error);
+                        responseHeadersTbody.innerHTML = '';
+                        const row = responseHeadersTbody.insertRow();
+                        const cell = row.insertCell();
+                        cell.colSpan = 2;
+                        cell.textContent = '获取响应头时发生错误。';
+                        cell.style.textAlign = 'center';
+                    });
+            }
+
+            function displayResponseHeaders() {
+                fetchAndDisplayResponseHeaders();
+            }
+
+            // 初始设置为隐藏
+            responseHeadersTable.style.display = 'none';
+            responseHeadersInfo.style.display = 'none';
+
+            // 添加点击事件监听器
+            toggleButton.addEventListener('click', function () {
+                if (responseHeadersTable.style.display === 'none') {
+                    responseHeadersTable.style.display = 'table';
+                    responseHeadersInfo.style.display = 'block';
+                    displayResponseHeaders(); // 显示并加载数据
+                } else {
+                    responseHeadersTable.style.display = 'none';
+                    responseHeadersInfo.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

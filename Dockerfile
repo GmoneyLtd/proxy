@@ -1,37 +1,30 @@
-# build stage
-FROM python:3.13.3-alpine AS builder
+# -------------- 构建阶段 --------------
+FROM ghcr.io/astral-sh/uv:python3.13-alpine AS builder
+# 设置工作目录为 app
+WORKDIR /app
+# 复制项目依赖文件
+COPY pyproject.toml uv.lock ./
+# 创建虚拟环境并安装依赖
+RUN uv sync --frozen --no-cache
+# 复制项目代码
+COPY . .
 
-# install PDM
-RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ \
-    && pip config set install.trusted-host mirrors.aliyun.com \
-    && pip install -U pip setuptools wheel \
-    && pip install pdm
-
-# copy files
-COPY pyproject.toml pdm.lock /project/
-# COPY src/ /project/src/
-
-# install dependencies and project into the local packages directory
-WORKDIR /project
-RUN mkdir __pypackages__ \
-    && pdm config pypi.url https://mirrors.aliyun.com/pypi/simple/ \
-    && pdm sync --prod --no-editable
-
-# run stage
+# -------------- 运行阶段 --------------
 FROM python:3.13.3-alpine
-
-ENV PYTHONPATH=/project/pkgs
-WORKDIR /project
-# retrieve packages from build stage
-COPY --from=builder /project/__pypackages__/3.13/lib /project/pkgs
-# retrieve executables
-COPY --from=builder /project/__pypackages__/3.13/bin/* /bin/
-
-# copy project files, 如何指定详细文件和目录会造成将目录内文件copy到镜像中，而没有将相关目录拷贝到镜像中，例如: COPY log src static views /project/
-COPY . /project/
-
-# expose port
+# 使用 apk 安装 curl
+RUN apk add --no-cache curl
+WORKDIR /app
+# 复制应用代码
+COPY --from=builder /app /app
+# 创建相关文件夹并保证权限属于 appuser
+RUN addgroup -S -g 1000 appuser && adduser -S -u 1000 appuser -G appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+# 设置环境变量，使用 `.venv` 作为虚拟环境及服务相关配置
+ENV PATH="/app/.venv/bin:$PATH"
+# 暴露应用端口
 EXPOSE 8000
-
-# set command/entrypoint, adapt to fit your needs
+# 应用程序健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD [ "curl", "-f", "http://localhost/api/healthz" ]
+# 运行应用
 CMD ["python", "proxy.py"]

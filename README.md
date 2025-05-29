@@ -6,7 +6,7 @@ docker push registry.cn-hangzhou.aliyuncs.com/apuer/proxy:0.1.1_AMD64
 ```
 ## arm64 build
 ```
-docker build -t registry.cn-hangzhou.aliyuncs.com/apuer/proxy:0.1.1_ARM64 --platform linux/arm64 .
+docker buildx build -t registry.cn-hangzhou.aliyuncs.com/apuer/proxy:0.1.1_ARM64 --platform linux/arm64 .
 docker push registry.cn-hangzhou.aliyuncs.com/apuer/proxy:0.1.1_ARM64
 ```
 
