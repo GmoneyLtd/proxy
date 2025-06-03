@@ -7,16 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="/static/proxy.svg">
     <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet"> -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
     <style>
         body {
             margin: 0;
             padding: 0;
             font-style: normal;
             font-weight: normal;
-            font-family: Arial, sans-serif;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            letter-spacing: 0.5px;
             font-size: 12px;
             color: #333;
             height: 100vh;
@@ -36,6 +34,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
         }
 
         .button-container button:hover {
@@ -51,8 +50,9 @@
             margin-top: 10px;
             margin-bottom: 10px;
             font-size: 16px;
-            font-family: 'Comic Sans MS', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-            font-weight: 800;
+            color: rgb(18, 86, 143);
+            /* font-family: 'Comic Sans MS', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
+            font-weight: 600;
             text-align: center;
         }
 
@@ -60,21 +60,33 @@
             margin-top: 10px;
             margin-bottom: 10px;
             font-size: 12px;
-            color: #e36433;
+            font-weight: 400;
+            color: rgb(40, 133, 133);
             font-style: italic;
-            font-family: 'Comic Sans MS', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            /* font-family: 'Comic Sans MS', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
             text-align: center;
         }
 
         p {
             /* padding: 10px 0px 10px 40px; */
             margin: 10px 0;
-            font-size: 12px;
-            font-family: 'Comic Sans MS', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-            font-weight: 800;
+            font-size: 16px;
+            /* font-family: 'Comic Sans MS', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
+            font-weight: 500;
             position: relative;
+            display: inline-block;
             /* left: 20px; */
             margin-left: 20px;
+            text-decoration: underline;
+            /* 为文本添加下划线 */
+            text-decoration-color: #e36433;
+            /* 下划线颜色 */
+            text-decoration-thickness: 1px;
+            /* 下划线厚度 */
+            text-underline-offset: 8px;
+            /* 下划线偏移量 */
+            text-decoration-skip-ink: none;
+            /* 跳过下划线和文本的墨水 */
         }
 
         #container {
@@ -123,7 +135,7 @@
 
         .info_table_label {
             width: 180px;
-            font-style: italic;
+            /* font-style: italic; */
             font-weight: 580;
         }
 
@@ -145,11 +157,11 @@
             <h3>display source IP and HTTP headers</h3>
             <h4>Source IP => {{source_info}}</h4>
             <div class="button-container">
-                <button id="toggle_response_headers_btn">显示/隐藏服务器响应头</button>
+                <button id="toggle_response_headers_btn">Show / Hide HTTP Headers</button>
             </div>
             <p>The following is the client request header information</p>
             <table class="info_table" summary="Client request Headers">
-                % for key, value in headers.items():
+                % for key, value in request_headers.items():
                 <tr>
                     <td class="info_table_label">{{key}}</td>
                     <td>{{value}}</td>
