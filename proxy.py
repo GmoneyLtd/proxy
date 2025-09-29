@@ -1,8 +1,8 @@
 # proxy.py - Bottle-based simple proxy service (optimized and reconstructed version)
 
 import logging
-import os
 from logging.handlers import TimedRotatingFileHandler
+import os
 
 from bottle import Bottle, HTTPResponse, error, redirect, request, static_file, template
 from waitress import serve
@@ -35,13 +35,15 @@ app = Bottle(template_path=TEMPLATE_ROOT)
 # ================== log configuration ==================
 
 
-def setup_logger():
+def setup_logger() -> logging.Logger:
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
 
-    file_handler = TimedRotatingFileHandler(filename=os.path.join(LOG_DIR, "proxy.log"), when="midnight", interval=1, backupCount=7, encoding="utf-8")
+    file_handler = TimedRotatingFileHandler(
+        filename=os.path.join(LOG_DIR, "proxy.log"), when="midnight", interval=1, backupCount=7, encoding="utf-8"
+    )
     file_handler.suffix = "%Y-%m-%d.log"
     file_handler.setFormatter(formatter)
 
@@ -76,7 +78,7 @@ app_logger = setup_logger()
 
 
 @app.route("/static/<filepath:path>")
-def serve_static(filepath):
+def serve_static(filepath: str) -> HTTPResponse:
     safe_path = os.path.normpath(os.path.join(STATIC_ROOT, filepath))
     if ".." in safe_path or not os.path.exists(safe_path):
         return HTTPResponse(status=403, body="Forbidden")
@@ -86,32 +88,34 @@ def serve_static(filepath):
 
 
 @app.route("/api/healthz", method="GET")
-def health_check():
+def health_check() -> dict:
     return {"status": "ok", "message": "Service is running"}
 
 
 @app.route("/", method="GET")
-def root_redirect():
+def root_redirect() -> HTTPResponse:
     redirect("/index")
 
 
 @app.route("/error", method="GET")
-def error_page():
+def error_page() -> HTTPResponse:
     return template("error.tpl", error_msg="An unknown error occurred")
 
 
 @app.route("/index", method="GET")
-def index_page():
+def index_page() -> HTTPResponse:
     source_info = f"[{request.environ.get('REMOTE_ADDR', 'unknown')}]:{request.environ.get('REMOTE_PORT', '')}"
     destination_info = f"[{request.headers.get('Host', 'unknown')}]"
     request_headers = dict(request.headers)
     app_logger.info({"source": source_info, "destination": destination_info, "request_headers": request_headers})
 
-    return template("index.tpl", source_info=source_info, destination_info=destination_info, request_headers=request_headers)
+    return template(
+        "index.tpl", source_info=source_info, destination_info=destination_info, request_headers=request_headers
+    )
 
 
 @app.route("/debug", method="GET")
-def debug_page():
+def debug_page() -> dict:
     debug_info = request.query.info
     client_ip = request.environ.get("REMOTE_ADDR", "unknown")
     allowed_debug_types = {"environ", "request"}
@@ -133,22 +137,46 @@ def debug_page():
 
 
 @app.route("/<path:path>")
-def catch_all(path):
+def catch_all(path: str) -> HTTPResponse:
     accept_header = request.get_header("Accept", "")
     is_json = "application/json" in accept_header
 
     app_logger.warning(f"No matching route found: {request.method} {request.path}")
 
     if is_json:
-        return HTTPResponse(status=404, body={"error": "Not Found", "message": f"path '/{path}' not exist"}, headers={"Content-Type": "application/json"})
+        return HTTPResponse(
+            status=404,
+            body={"error": "Not Found", "message": f"path '/{path}' not exist"},
+            headers={"Content-Type": "application/json"},
+        )
     else:
         return template("error.tpl", error_msg=f"path '/{path}' not exist")
 
 
+@error(404)
 @error(500)
-def handle_error_500(err):
-    app_logger.exception(f"Internal Server Error: {err.body}")
-    return template("error.tpl", error_msg="Internal Server Error")
+def handle_error(err: Exception) -> HTTPResponse:
+    """统一处理HTTP错误"""
+    status_code = error.status_code
+    app_logger.error(f"HTTP Error {status_code}: {error.body}")
+
+    # 根据Accept头判断返回JSON还是HTML
+    accept_header = request.get_header("Accept", "")
+    is_json = "application/json" in accept_header
+
+    if is_json:
+        return HTTPResponse(
+            status=status_code,
+            body={
+                "error": f"HTTP {status_code}",
+                "message": str(error.body),
+            },
+            headers={"Content-Type": "application/json"},
+        )
+    else:
+        return template(
+            "error.tpl", error_msg=error.body, status_code=status_code
+        )
 
 
 # ================== start the service ==================
