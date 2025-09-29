@@ -2,6 +2,7 @@
 .idea/
 .vscode/
 **/.venv
+.qoder/
 **/.classpath
 **/.dockerignore
 **/.git
@@ -25,7 +26,8 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 # General
-.DS_Store
+**/.DS_Store
 .AppleDouble
 .LSOverride
 **/*.log
+
