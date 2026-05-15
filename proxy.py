@@ -17,7 +17,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 
 SERVER_CONFIG = {
-    "host": "0.0.0.0",
+    "host": "[::]",
     "port": 8000,
     "channel_timeout": 60,
     "ident": f"[{APP_NAME}]",

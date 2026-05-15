@@ -175,7 +175,7 @@
             <div style="height: 50px;"></div>
         </div>
     </div>
-    <div id="footer">&copy; 2025 Powered By Proxy PoC</div>
+    <div id="footer">&copy; 2026 Powered By Proxy PoC</div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const toggleButton = document.getElementById('toggle_response_headers_btn');

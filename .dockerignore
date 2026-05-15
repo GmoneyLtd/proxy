@@ -1,10 +1,8 @@
 **/__pycache__
-.idea/
-.vscode/
 **/.venv
-.qoder/
 **/.classpath
 **/.dockerignore
+**/.env
 **/.git
 **/.gitignore
 **/.project
@@ -25,9 +23,23 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
-# General
+log/*.log
+.python-version
+tests/
+.ruff_cache
+.codebuddy/
+.qoder/
 **/.DS_Store
-.AppleDouble
-.LSOverride
-**/*.log
+.kiro/
+.claude/
+.wolf/
+.github/
+.vscode/
+.idea/
+docker-build.sh
+sync2repo.sh
+CONTRIBUTING.md
+docs/
+anyshare.db*
+.idea/
 
