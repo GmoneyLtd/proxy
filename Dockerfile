@@ -24,6 +24,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 # 使用 wget 进行健康检查（Alpine 默认自带）
 HEALTHCHECK --interval=60s --timeout=5s --start-period=20s --retries=3 \
-    CMD wget -q -O /dev/null http://localhost:9187/healthz || exit 1
+    CMD wget -q -O /dev/null http://localhost:8000/healthz || exit 1
 # 运行应用
 CMD ["python", "proxy.py"]
